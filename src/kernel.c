@@ -41,8 +41,8 @@ static inline uint16_t vga_entry(unsigned char uc, uint8_t color){
 
 size_t strlen(const char* str){
 	size_t len = 0;
-	while(str[len++])
-		;
+	while(str[len])
+		len++;
 	return len;
 }
 
@@ -77,12 +77,22 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y){
 }
 
 void terminal_putchar(char c){
-	terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
-	if(++terminal_column == VGA_WIDTH){
+	if(c == '\n'){
+		while(terminal_column != VGA_WIDTH)
+			terminal_putentryat(' ', terminal_color, terminal_column++, terminal_row);
 		terminal_column = 0;
 		if (++terminal_row == VGA_HEIGHT)
 			terminal_row = 0;
 	}
+	else{
+		terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
+		if(terminal_column++ == VGA_WIDTH){
+			terminal_column = 0;
+			if (++terminal_row == VGA_HEIGHT)
+				terminal_row = 0;
+		}
+	}
+	
 }
 
 void terminal_write(const char* data, size_t size){
@@ -97,7 +107,14 @@ void terminal_writestring(const char* data){
 void kernel_main(){
 	terminal_initialize();
 
+	terminal_setcolor(VGA_COLOR_LIGHT_GREEN);
 	terminal_writestring("Hello, kernel World!\n");
+	terminal_setcolor(VGA_COLOR_LIGHT_CYAN);
+	terminal_writestring("How are you?\n");
+	terminal_setcolor(VGA_COLOR_LIGHT_GREEN);
+	terminal_writestring("I'm good how are you?\n");
+	terminal_setcolor(VGA_COLOR_LIGHT_CYAN);
+	terminal_writestring("That's good to hear! I am also good!\n");
 }
 
 
