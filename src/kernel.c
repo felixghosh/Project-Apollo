@@ -79,15 +79,18 @@ void terminal_putentryat(char c, uint8_t color, size_t x, size_t y){
 void terminal_putchar(char c){
 	if(c == '\n'){
 		terminal_column = 0;
-		if (++terminal_row == VGA_HEIGHT)
-			terminal_row = 0;
+		if (++terminal_row == VGA_HEIGHT){
+			terminal_shift_buffer(VGA_WIDTH);
+			terminal_row = VGA_HEIGHT-1;
+		}
 	}
 	else{
 		terminal_putentryat(c, terminal_color, terminal_column, terminal_row);
 		if(terminal_column++ == VGA_WIDTH){
 			terminal_column = 0;
 			if (++terminal_row == VGA_HEIGHT)
-				terminal_row = 0;
+				terminal_shift_buffer(VGA_WIDTH);
+				terminal_row = VGA_HEIGHT-1;
 		}
 	}
 	
@@ -102,6 +105,16 @@ void terminal_writestring(const char* data){
 	terminal_write(data, strlen(data));
 }
 
+void terminal_shift_buffer(size_t c){
+	int i;
+	for(i = 0; i < VGA_WIDTH*VGA_HEIGHT - c; i++)
+		terminal_buffer[i] = terminal_buffer[i+c];
+	for(i; i < VGA_WIDTH*VGA_HEIGHT; i++)
+		terminal_buffer[i] = vga_entry(' ', terminal_color);
+}
+
+
+
 void kernel_main(){
 	terminal_initialize();
 
@@ -113,6 +126,10 @@ void kernel_main(){
 	terminal_writestring("I'm good how are you?\n");
 	terminal_setcolor(VGA_COLOR_LIGHT_CYAN);
 	terminal_writestring("That's good to hear! I am also good!\n");
+	terminal_writestring("1\n2\n3\n4\n5\n6\n7\n8\n9\n10\n11\n12\n13\n14\n15\n16\n17\n18\n19\n20\n21\n22\n23\n24\n");
+	terminal_setcolor(VGA_COLOR_LIGHT_RED);
+	terminal_writestring("This should be on the last line!");
+	
 }
 
 
